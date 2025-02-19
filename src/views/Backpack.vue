@@ -124,55 +124,51 @@
 import { ref, computed } from 'vue'
 import { usePlayerStore } from '@/store'
 import { message } from 'ant-design-vue'
-import { ItemTypes, ItemQualities } from '@/assets/mock/gameData'
+import { itemTypes, itemQualities } from '@/assets/mock/gameData'
 
 const playerStore = usePlayerStore()
 const activeTab = ref('all')
 
 // 装备栏位定义
 const equipmentSlots = ref([
-  { type: ItemTypes.WEAPON, name: '武器', item: null },
-  { type: ItemTypes.ARMOR, name: '防具', item: null },
-  { type: ItemTypes.ACCESSORY, name: '饰品', item: null }
+  { type: itemTypes.WEAPON, name: '武器', item: null },
+  { type: itemTypes.ARMOR, name: '防具', item: null }
 ])
 
 // 物品分类
 const equipmentItems = computed(() => 
   playerStore.inventory.filter(item => 
-    [ItemTypes.WEAPON, ItemTypes.ARMOR, ItemTypes.ACCESSORY].includes(item.type)
+    [itemTypes.WEAPON, itemTypes.ARMOR].includes(item.type)
   )
 )
 
 const pillItems = computed(() => 
   playerStore.inventory.filter(item => 
-    [ItemTypes.CULTIVATION_PILL, ItemTypes.BREAKTHROUGH_PILL].includes(item.type)
+    item.type === itemTypes.PILL
   )
 )
 
 const materialItems = computed(() => 
   playerStore.inventory.filter(item => 
-    [ItemTypes.MATERIAL, ItemTypes.SPIRIT_STONE].includes(item.type)
+    item.type === itemTypes.MATERIAL
   )
 )
 
 // 获取物品品质样式
 const getQualityClass = (item) => {
-  const quality = Object.entries(ItemQualities).find(([_, value]) => 
-    value.name === item.quality.name
-  )
-  return quality ? `quality-${quality[0].toLowerCase()}` : ''
+  if (!item.quality) return ''
+  const quality = itemQualities[item.quality]
+  return quality ? `quality-${item.quality.toLowerCase()}` : ''
 }
 
 // 获取物品操作文本
 const getItemActionText = (item) => {
   switch (item.type) {
-    case ItemTypes.WEAPON:
-    case ItemTypes.ARMOR:
-    case ItemTypes.ACCESSORY:
+    case itemTypes.WEAPON:
+    case itemTypes.ARMOR:
       return '装备'
-    case ItemTypes.CULTIVATION_PILL:
-    case ItemTypes.BREAKTHROUGH_PILL:
-    case ItemTypes.SPIRIT_STONE:
+    case itemTypes.PILL:
+    case itemTypes.MATERIAL:
       return '使用'
     default:
       return ''
@@ -200,9 +196,8 @@ const getEffectDescription = (key, value) => {
 // 处理物品使用
 const handleUseItem = (item) => {
   switch (item.type) {
-    case ItemTypes.WEAPON:
-    case ItemTypes.ARMOR:
-    case ItemTypes.ACCESSORY:
+    case itemTypes.WEAPON:
+    case itemTypes.ARMOR:
       equipItem(item)
       break
     default:
